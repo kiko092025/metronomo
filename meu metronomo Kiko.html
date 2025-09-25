@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Metrônomo do Kiko</title>
+  <style>
+    :root {
+      --accent: #6b2e10;
+      --bg: #f7f3ec;
+      --text: #2e1c14;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+
+    h1 {
+      font-size: clamp(1.5rem, 5vw, 2.5rem);
+      margin-bottom: 1rem;
+      text-align: center;
+      color: var(--accent);
+    }
+
+    .dial {
+      margin: 1rem auto;
+      width: min(80vw, 280px);
+      height: min(80vw, 280px);
+      border-radius: 50%;
+      background: radial-gradient(circle at center, #fff, #ddd);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: inset 0 6px 14px rgba(0,0,0,0.15), 0 6px 20px rgba(0,0,0,0.25);
+    }
+
+    .pendulum {
+      position: absolute;
+      top: 8%;
+      left: 50%;
+      width: 6px;
+      height: 60%;
+      background: var(--accent);
+      border-radius: 3px;
+      transform-origin: top center;
+    }
+
+    .bob {
+      position: absolute;
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .controls {
+      width: 100%;
+      max-width: 400px;
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    input[type=range] {
+      width: 100%;
+      margin: 10px 0;
+    }
+
+    input[type=number] {
+      width: 100px;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid var(--accent);
+      text-align: center;
+      margin-top: .5rem;
+    }
+
+    button {
+      margin: 8px;
+      padding: .7rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    footer {
+      margin-top: auto;
+      font-size: .8rem;
+      text-align: center;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>Metrônomo do Kiko</h1>
+
+  <div class="dial">
+    <div class="pendulum" id="pendulum"></div>
+    <div class="bob">K</div>
+  </div>
+
+  <div class="controls">
+    <label>BPM: 
+      <input type="number" id="bpm" value="100" min="30" max="260">
+    </label>
+    <input type="range" id="bpmRange" min="30" max="260" value="100">
+    <div>
+      <button id="start">Iniciar</button>
+      <button id="stop">Parar</button>
+    </div>
+  </div>
+
+  <footer>Feito especialmente para você.  🎵</footer>
+
+  <script>
+    const bpmInput = document.getElementById('bpm');
+    const bpmRange = document.getElementById('bpmRange');
+    const pendulum = document.getElementById('pendulum');
+
+    let intervalId = null;
+    let isLeft = true;
+
+    bpmInput.addEventListener('input', () => {
+      bpmRange.value = bpmInput.value;
+    });
+
+    bpmRange.addEventListener('input', () => {
+      bpmInput.value = bpmRange.value;
+    });
+
+    function startMetronome() {
+      if (intervalId) return;
+      const bpm = parseInt(bpmInput.value);
+      const interval = (60 / bpm) * 1000;
+      intervalId = setInterval(() => {
+        pendulum.style.transform = `rotate(${isLeft ? -25 : 25}deg)`;
+        isLeft = !isLeft;
+        new AudioContext().createOscillator().start();
+      }, interval);
+    }
+
+    function stopMetronome() {
+      clearInterval(intervalId);
+      intervalId = null;
+      pendulum.style.transform = 'rotate(0deg)';
+    }
+
+    document.getElementById('start').addEventListener('click', startMetronome);
+    document.getElementById('stop').addEventListener('click', stopMetronome);
+  </script>
+</body>
+</html>
